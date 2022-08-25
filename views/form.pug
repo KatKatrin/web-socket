@@ -1,0 +1,41 @@
+
+doctype html
+html(lang="en")
+  head
+  
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    
+    title Document
+
+    style
+      include ../style.css
+    link(rel='stylesheet' href='../style.css')
+    
+  body 
+
+    if mainPage 
+      .main 
+        a(href="http://127.0.0.1:3000/signup") SIGN UP 
+        a(href="http://127.0.0.1:3000/signin") SIGN IN 
+    else 
+      .main
+        form.form(action="/sendData" method="post")
+          if signUp
+            h2 SIGN UP
+          else 
+            h2 SIGN IN
+          .form-info
+            label(for='userEmail') E-mail:
+            input#email(type='email' name='userEmail' placeholder='Enter e-mail' required='')
+          .form-info
+            if signUp 
+              label(for='userName') Username:
+              input#username(type='text' name='userName' placeholder='Enter you name' required='')
+            else 
+              div
+          .form-info
+            label(for='password') Password:
+            input#password(type='password' name='password' placeholder='Enter password' required='')
+          button.submit-button(type='submit') SUBMIT
