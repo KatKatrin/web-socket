@@ -10,6 +10,7 @@ const PORT = 3000;
 
 let users = [];
 
+app.set('views', './src/views')
 app.set('view engine', 'pug');
 
 
@@ -35,14 +36,16 @@ app.get('/', (req, res) => {
 })
 
 
-app.post("/sendData", urlencodedParser, function (request, response) {
-  if(!request.body) return response.sendStatus(400);
+app.post("/send-data", urlencodedParser, function (request, response) {
+  if(!request.body) {
+    return response.sendStatus(400)
+  };
   users.push(request.body)
-  console.log(request.body);
   response.send(`${request.body.userEmail} - ${request.body.password}`);
 });
 
-app.get("/sendData", function (request, response) {
+
+app.get("/send-data", function (request, response) {
     
   response.send(users);
 });

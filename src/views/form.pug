@@ -10,18 +10,18 @@ html(lang="en")
     title Document
 
     style
-      include ../style.css
-    link(rel='stylesheet' href='../style.css')
+      include ../style/style.css
+    link(rel='stylesheet' href='../style/style.css')
     
   body 
 
     if mainPage 
       .main 
-        a(href="http://127.0.0.1:3000/signup") SIGN UP 
-        a(href="http://127.0.0.1:3000/signin") SIGN IN 
+        a(href="/signup") SIGN UP 
+        a(href="/signin") SIGN IN 
     else 
       .main
-        form.form(action="/sendData" method="post")
+        form.form(action="/send-data" method="post")
           if signUp
             h2 SIGN UP
           else 
