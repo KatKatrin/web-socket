@@ -21,7 +21,7 @@ html(lang="en")
         a(href="main/signin") SIGN IN 
     else 
       .main
-        form.form(action="/send-data" method="post")
+        form.form(action="")
           if signUp
             h2 SIGN UP
           else 
@@ -37,5 +37,5 @@ html(lang="en")
               div
           .form-info
             label(for='password') Password:
-            input#password(type='password' name='password' placeholder='Enter password' required='')
+            input#password(type='password' name='userPassword' placeholder='Enter password' required='')
           button.submit-button(type='submit') SUBMIT

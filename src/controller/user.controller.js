@@ -1,30 +1,37 @@
 import bcrypt from 'bcryptjs';
-import  jwt  from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import db from '../db';
-import secret from '../config';
+import fs from 'fs';
 
+function generateTokenAsync(id) {
+  const payload = { id };
+  const privateKey = fs.readFileSync('./src/private.key');
 
-function generateToken(id) {
-  const payload = {id};
-  return jwt.sign(payload, secret, {expiresIn:'24h'})
+  return new Promise((resolve, reject) => {
+    jwt.sign(payload, privateKey, { algorithm: 'RS256' }, function(err, token) { 
+      if (err){
+        reject(err)
+        return
+      }
+      resolve(token)
+    });
+  })
 }
-
 
 class UserController {
 
   async registerUser(req, res){
 
-    if(!req.body) {
-      return res.sendStatus(400);
-    } else {
-
+    if(req.body){
+      const DEFAULT_SALT = 7;
       const {userName, userEmail, userPassword} = req.body;
       
-      const hashPassword = bcrypt.hashSync(userPassword, 7);
+      const hashPassword = bcrypt.hashSync(userPassword, DEFAULT_SALT);
       const newUser = await db.query('INSERT INTO users (userName, userEmail, userPassword) values ($1, $2, $3) RETURNING *', [userName, userEmail, hashPassword])
 
-      res.json(newUser.rows[0]); 
+      return res.json(newUser.rows[0]); 
     }
+      return res.sendStatus(400);
   };
 
   async loginUser(req, res){
@@ -43,10 +50,9 @@ class UserController {
       return  res.json('Wrong password')
     } 
 
-    const token = generateToken(user.id);
-
-    return res.json({message:'User LogedIn', 
-                    token:token });
+    generateTokenAsync(user.id)
+      .then(token => res.json({ message:'User LogedIn', 
+                                token }))
   };
 
   async getUsers(req, res){

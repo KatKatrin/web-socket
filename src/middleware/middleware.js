@@ -1,6 +1,6 @@
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import fs from 'fs';
 
-import secret from "../config";
 
 function checkToken (req, res, next) {
 
@@ -9,20 +9,29 @@ function checkToken (req, res, next) {
     }
 
     try {
-      
-        const token = req.headers.authorization.split(' ')[1]
+        const token = req.headers.authorization.split(' ')[1];
+        const privateKey = fs.readFileSync('./src/private.key');
 
         if (!token) {
-            return res.status(403).json({message: "User do not authorized"})
+            return res.status(403).json({message: "User do not authorized 1"})
         }
 
-        const decodedData = jwt.verify(token, secret)
-  
-        req.userDecodedData = decodedData
+        const decodedData = new Promise((resolve, reject) => {
+            jwt.verify(token, privateKey, { algorithms: ['RS256'] }, function(err, decoded){
+                if (err){
+                    reject(err)
+                    return
+                }
+                  resolve(decoded)
+            })
+        })
 
-        next()
+         decodedData.then(decoded => { req.userDecodedData = decoded })
+                    .then(next())
+
+
     } catch (e) {
-        return res.status(403).json({message: "User do not authorized"})
+        return res.status(403).json({message: e})
     }
 };
 
