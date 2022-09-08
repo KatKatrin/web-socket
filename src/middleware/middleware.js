@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import fs from 'fs';
+import privateKey from "../privateKey.js";
 
 
 function checkToken (req, res, next) {
@@ -10,7 +10,6 @@ function checkToken (req, res, next) {
 
     try {
         const token = req.headers.authorization.split(' ')[1];
-        const privateKey = fs.readFileSync('./src/private.key');
 
         if (!token) {
             return res.status(403).json({message: "User do not authorized 1"})
@@ -19,8 +18,7 @@ function checkToken (req, res, next) {
         const decodedData = new Promise((resolve, reject) => {
             jwt.verify(token, privateKey, { algorithms: ['RS256'] }, function(err, decoded){
                 if (err){
-                    reject(err)
-                    return
+                   return reject(err)
                 }
                   resolve(decoded)
             })
@@ -31,7 +29,7 @@ function checkToken (req, res, next) {
 
 
     } catch (e) {
-        return res.status(403).json({message: e})
+        return res.status(403).json({ message: e })
     }
 };
 

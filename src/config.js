@@ -1,3 +1,3 @@
-const secret = 'secret_key';
+const DEFAULT_SALT = 7;
 
-export default secret;
+export default DEFAULT_SALT;

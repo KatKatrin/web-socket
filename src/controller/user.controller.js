@@ -1,17 +1,17 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import db from '../db';
-import fs from 'fs';
+import ServiceLayer from '../services/service.Layer';
+import privateKey from '../privateKey.js';
+import DEFAULT_SALT from '../config';
+
 
 function generateTokenAsync(id) {
   const payload = { id };
-  const privateKey = fs.readFileSync('./src/private.key');
-
+  
   return new Promise((resolve, reject) => {
     jwt.sign(payload, privateKey, { algorithm: 'RS256' }, function(err, token) { 
       if (err){
-        reject(err)
-        return
+       return reject(err)
       }
       resolve(token)
     });
@@ -21,44 +21,38 @@ function generateTokenAsync(id) {
 class UserController {
 
   async registerUser(req, res){
-
     if(req.body){
-      const DEFAULT_SALT = 7;
       const {userName, userEmail, userPassword} = req.body;
-      
       const hashPassword = bcrypt.hashSync(userPassword, DEFAULT_SALT);
-      const newUser = await db.query('INSERT INTO users (userName, userEmail, userPassword) values ($1, $2, $3) RETURNING *', [userName, userEmail, hashPassword])
-
-      return res.json(newUser.rows[0]); 
+      const newUser = await ServiceLayer.registerDB(userName, userEmail, hashPassword);
+      
+      return res.json(newUser); 
     }
       return res.sendStatus(400);
   };
 
   async loginUser(req, res){
-
     const {userName, userPassword} = req.body;
-
-    const user = await db.query('SELECT * FROM users WHERE userName = $1', [userName])
-
+    const user = await ServiceLayer.loginDB(userName)
     if(!user){
-      res.sendStatus(400).json('User do not registrated')
+     return res.sendStatus(400).json('User do not registrated')
     }
 
-    const validPassword = bcrypt.compareSync(userPassword, user.rows[0].userpassword)
+    const validPassword = bcrypt.compareSync(userPassword, user.userPassword)
 
     if (!validPassword) {
-      return  res.json('Wrong password')
+      return  res.sendStatus(400).json('Wrong password')
     } 
 
-    generateTokenAsync(user.id)
-      .then(token => res.json({ message:'User LogedIn', 
-                                token }))
+    const token = await generateTokenAsync(user.id);
+
+    res.json({ message:'User LogedIn', 
+               token })
   };
 
   async getUsers(req, res){
-
-    const users = await db.query('SELECT * FROM users');
-    res.json(users.rows)
+    const users = await ServiceLayer.usersDB();
+    res.json(users)
   }
 }
 
