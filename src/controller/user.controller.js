@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import ServiceLayer from '../services/service.Layer';
+import userService from '../services/users.service.js';
 import privateKey from '../privateKey.js';
 import DEFAULT_SALT from '../config';
 
 
-function generateTokenAsync(id) {
+function generateToken(id) {
   const payload = { id };
   
   return new Promise((resolve, reject) => {
@@ -18,13 +18,24 @@ function generateTokenAsync(id) {
   })
 }
 
+function compareHash(password, originalPassword){
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, originalPassword, (err, result) => {
+      if (err){
+        return reject(err)
+      }
+      resolve(result)
+      })
+  })
+}
+
 class UserController {
 
   async registerUser(req, res){
     if(req.body){
-      const {userName, userEmail, userPassword} = req.body;
-      const hashPassword = bcrypt.hashSync(userPassword, DEFAULT_SALT);
-      const newUser = await ServiceLayer.registerDB(userName, userEmail, hashPassword);
+      const { name, email, password } = req.body;
+      const hashPassword = bcrypt.hashSync(password, DEFAULT_SALT);
+      const newUser = await userService.saveUser(name, email, hashPassword);
       
       return res.json(newUser); 
     }
@@ -32,26 +43,26 @@ class UserController {
   };
 
   async loginUser(req, res){
-    const {userName, userPassword} = req.body;
-    const user = await ServiceLayer.loginDB(userName)
-    if(!user){
-     return res.sendStatus(400).json('User do not registrated')
+    const { name, password } = req.body;
+    const user = await userService.login(name)
+    if (!user){
+     return res.status(400).json({ result: 'User do not registered' })
     }
 
-    const validPassword = bcrypt.compareSync(userPassword, user.userPassword)
+    const validPassword = await compareHash(password, user.password)
 
     if (!validPassword) {
-      return  res.sendStatus(400).json('Wrong password')
+      return  res.status(400).json({ error: "Wrong password" })
     } 
 
-    const token = await generateTokenAsync(user.id);
+    const token = await generateToken(user.id);
 
     res.json({ message:'User LogedIn', 
                token })
   };
 
   async getUsers(req, res){
-    const users = await ServiceLayer.usersDB();
+    const users = await userService.findAll();
     res.json(users)
   }
 }

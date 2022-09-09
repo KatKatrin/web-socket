@@ -1,31 +1,31 @@
 import { Sequelize, DataTypes } from "sequelize";
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
 const DB = process.env.DB;
 const DB_NAME = process.env.DB_NAME;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const HOST = process.env.HOST;
 
+
 const sequelize = new Sequelize(DB_NAME, DB, DB_PASSWORD, {
   host: HOST,
   dialect: DB
 });
 
-const UsersTable = sequelize.define(
-  'UsersTable',
+const Users = sequelize.define(
+  'Users',
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    userName:{
+    name:{
       type: DataTypes.STRING,
     }, 
-    userEmail: DataTypes.STRING(40), 
-    userPassword:DataTypes.STRING
+    email: DataTypes.STRING(40), 
+    password:DataTypes.STRING
   }
 )
 
-export default UsersTable;
+export default Users;

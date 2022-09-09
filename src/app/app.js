@@ -1,10 +1,9 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import express from "express";
-import { pageRouter } from "../routes/routes";
+import { pageRouter } from "../routes/index";
 import UserController from "../controller/user.controller";
 import checkToken from '../middleware/middleware';
 
-dotenv.config();
 
 const PORT = process.env.PORT;
 
@@ -21,5 +20,3 @@ app.post("/register", UserController.registerUser);
 app.get("/users", checkToken, UserController.getUsers);
 
 app.listen(PORT, () => {console.log('Server work', PORT)});
-
-
