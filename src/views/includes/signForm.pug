@@ -1,0 +1,19 @@
+.main
+        form.form(action="")
+          if signUp
+            h2 SIGN UP
+          else 
+            h2 SIGN IN
+          .form-info
+            label(for='userEmail') E-mail:
+            input#email(type='email' name='userEmail' placeholder='Enter e-mail' required='')
+          .form-info
+            if signUp 
+              label(for='userName') Username:
+              input#username(type='text' name='userName' placeholder='Enter you name' required='')
+            else 
+              div
+          .form-info
+            label(for='password') Password:
+            input#password(type='password' name='userPassword' placeholder='Enter password' required='')
+          button.submit-button(type='submit') SUBMIT
